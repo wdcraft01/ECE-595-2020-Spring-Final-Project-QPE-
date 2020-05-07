@@ -1,0 +1,176 @@
+\documentclass{article}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{}
+\chead{}
+\rhead{Warren D. (Hoss) Craft Final Project ECE 595}
+\lfoot{}
+\cfoot{\thepage}
+\rfoot{}
+\usepackage{amsmath, amsthm, amssymb}
+\usepackage{mathtools}
+\usepackage{bbold} % allow an identity elem 1
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{hyperref}
+\usepackage{changepage}
+\usepackage{lipsum}
+\usepackage{scrextend} % for block indents (for example)
+\usepackage{color, colortbl} % For Coloring Table Elements
+\usepackage{listings}
+\usepackage{makecell}  % allows more complex table formatting
+\usepackage{multirow}
+\usepackage{proof}     % for inference trees
+\usepackage{subcaption}
+\usepackage{enumitem}  % allows customization of enumerate
+
+\usepackage{wrapfig}   % allows wrapping text around figures
+\usepackage{sidecap}   % allows side captions on figures
+\sidecaptionvpos{figure}{t}
+\usepackage{physics}   % provides abs{} and norm{}, as well as bra{} and ket{} notations
+
+% for the makecell package:
+\renewcommand\theadalign{bc}
+\renewcommand\theadfont{\bfseries}
+\renewcommand\theadgape{\Gape[4pt]}
+\renewcommand\cellgape{\Gape[4pt]}
+
+\addtolength{\hoffset}{-1cm}
+\addtolength{\textwidth}{1cm}
+\graphicspath{ {IMAGES/} }
+
+\definecolor{Gray}{gray}{0.9}
+\newcolumntype{g}{>{\columncolor{Gray}}c}
+
+% for bibliography and citations
+\usepackage{biblatex}
+\addbibresource{bibliography.bib}
+
+% for script lettering, e.g.
+% for Fourier transform
+\usepackage[mathscr]{euscript}
+
+% For quantum circuit diagrams
+\usepackage{qcircuit}
+
+% For shading paragraph boxes
+\usepackage[framemethod=tikz]{mdframed}
+
+\title{ECE 595: Introduction to Quantum Computing\\
+Final Project: Review of Quantum Phase Estimation}
+\author{Warren D. (Hoss) Craft}
+\date{Tues 5/12/2020}
+
+\begin{document}
+\maketitle
+%\tableofcontents
+
+\flushleft
+
+Note: References throughout the homework to ``Mermin'' refer to Mermin's (2007) \textit{Quantum Computer Science: An Introduction} \cite{Mermin_2007}, and references to ``Nielsen \& Chuang'' or just ``N\&C'' refer to Nielsen \& Chuang's (2010) \textit{Quantum Computation and Quantum Information (10th Anniversary Edition)} \cite{Nielsen_&_Chuang_2010}, and further bracketed citations are omitted.
+
+\begin{enumerate}[label=\textbf{(\arabic*)}]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   N&C Exercise 5.7 (pg 222)   %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\item Nielsen \& Chuang's Exercise 5.7 (pg 222):
+\vspace{0.1in}
+\begin{adjustwidth}{100pt}{100pt}
+\begin{mdframed}[hidealllines=true, backgroundcolor=gray!20]
+\textbf{Exercise 5.7:} Additional insight into the circuit in Figure 5.2 may be obtained by showing, as you should now do, that the effect of the sequence of controlled-U operations like that in Figure 5.2 is to take the state $\ket{j}\ket{u}$ to $\ket{j}U^{j}\ket{u}$. (Note that this does not depend on $\ket{u}$ being an eigenstate of $U$.)
+\end{mdframed}
+\end{adjustwidth}
+
+\textbf{Solution.} We take $\ket{j} = \ket{j}_{t}$ --- \textit{i.e.}, $j$ is an integer value expressible in $t$ bits, so that
+\begin{align}
+    j = \sum_{i=0}^{t-1} \alpha_i 2^i, \text{ for } \alpha_i \in \{0, 1\}
+\end{align}
+and thus
+\begin{align}
+    \ket{j} = \ket{\alpha_{t-1}}\ket{\alpha_{t-1}}\ldots\ket{\alpha_{1}}\ket{\alpha_{0}}
+\end{align}
+Then the effect of the sequence of controlled-$U$ operations like that in Figure 5.2 is to effect the transformation:
+\begin{align}
+    \ket{j}\ket{u} 
+    &\mapsto
+    \ket{j}\prod_{i=0}^{t-1}{e^{2\pi i (\alpha_i 2^i \varphi)}}\ket{u}
+\end{align}
+because for each non-zero $\alpha_i$ in the expansion of $j$, we will obtain a (non-unitary) factor of $e^{2\pi i (2^i \varphi)}$. The product of the exponential functions can be re-expressed as sum in the exponent, where the sum is exactly our formula for $j$: 
+\begin{align}
+    \ket{j}\prod_{i=0}^{t-1}{e^{2\pi i (\alpha_i 2^i \varphi)}}\ket{u}
+    &=
+    \ket{j}{e^{2\pi i (\sum_{i=0}^{t-1}(\alpha_i 2^i) \varphi)}}\ket{u}\\
+    &=
+    \ket{j}{e^{2\pi i (j \varphi)}}\ket{u}\\
+    &=
+    \ket{j}{\left(e^{2\pi i \varphi}\right)^j}\ket{u}\\
+    &=
+    \ket{j}{U^j}\ket{u}\\
+\end{align}
+where in the end we used the fact that $U\ket{u} = e^{2\pi i \varphi}\ket{u}$ and thus $U^{j}\ket{u} = (e^{2\pi i \varphi})^j\ket{u}$.
+
+Some simple concrete examples of this result are shown worked out from scratch in Table \ref{table:Prob_5.7} for $j$ defined on $t=3$ Qbits.
+
+\begin{table}[th]
+    \captionsetup{font=small, width = 14cm}
+    \centering
+    \begin{tabular}{c|c|c|c}
+        $\ket{j}\ket{u}$ input & output & simplified output\\
+        \hline\hline
+        &&\\[-5pt]
+        $\ket{001}\ket{u}$
+        & $\ket{001}U^{2^0}\ket{u}$
+        & $\ket{001}U^{1}\ket{u} = \ket{1}_3 U^{1}\ket{u}$
+        \\[5pt]
+        \hline
+        &&\\[-5pt]
+        $\ket{010}\ket{u}$
+        & $\ket{010}U^{2^1}\ket{u}$
+        & $\ket{010}U^{2}\ket{u} = \ket{2}_3 U^{2}\ket{u}$
+        \\[5pt]
+        \hline
+        &&\\[-5pt]
+        $\ket{011}\ket{u}$
+        & $\ket{011}U^{2^1}U^{2^0}\ket{u}$
+        & $\ket{011}U^{2}U^{1}\ket{u} = \ket{3}_3 U^{3}\ket{u}$
+        \\[5pt]
+        \hline
+        &&\\[-5pt]
+        $\ket{100}\ket{u}$
+        & $\ket{100}U^{2^2}\ket{u}$
+        & $\ket{100}U^{4}\ket{u} = \ket{4}_3 U^{4}\ket{u}$
+        \\[5pt]
+        \hline
+        &&\\[-5pt]
+        $\ket{101}\ket{u}$
+        & $\ket{101}U^{2^2}U^{2^0}\ket{u}$
+        & $\ket{101}U^{4}U^{1}\ket{u} = \ket{5}_3 U^{5}\ket{u}$
+        \\[5pt]
+        \hline
+        &&\\[-5pt]
+        $\ket{110}\ket{u}$
+        & $\ket{110}U^{2^2}U^{2^1}\ket{u}$
+        & $\ket{110}U^{4}U^{2}\ket{u} = \ket{6}_3 U^{6}\ket{u}$
+        \\[5pt]
+        \hline
+        \end{tabular}
+    \caption{Examples of results for Exercise 5.7, with $j$ defined on 3 Qbits.}
+    \label{table:Prob_5.7}
+\end{table}
+
+\clearpage
+
+% \clearpage
+\end{enumerate}
+
+% \clearpage
+% ========== %
+% END MATTER %
+% ========== %
+% \newpage
+\printbibliography
+
+\end{document}
