@@ -52,7 +52,9 @@
 \usepackage[mathscr]{euscript}
 
 % For quantum circuit diagrams
-\usepackage{qcircuit}
+% \usepackage{qcircuit}
+\usepackage{tikz}
+\usetikzlibrary{quantikz}
 
 % For shading paragraph boxes
 \usepackage[framemethod=tikz]{mdframed}
@@ -71,6 +73,61 @@ Final Project: Review of Quantum Phase Estimation}
 Note: References throughout the homework to ``Mermin'' refer to Mermin's (2007) \textit{Quantum Computer Science: An Introduction} \cite{Mermin_2007}, and references to ``Nielsen \& Chuang'' or just ``N\&C'' refer to Nielsen \& Chuang's (2010) \textit{Quantum Computation and Quantum Information (10th Anniversary Edition)} \cite{Nielsen_&_Chuang_2010}, and further bracketed citations are omitted.
 
 \begin{enumerate}[label=\textbf{(\arabic*)}]
+
+\item Intro
+
+Nielsen \& Chuang (2010) segue from the quantum Fourier transform to quantum phase estimation (QPE) by remarking that ``The Fourier transform is the key to a general procedure known as phase estimation, which in turn is the key for many quantum algorithms'' (pg 221). Among the many quantum algorithms for which QPE is key are the quantum order-finding and quantum factoring algorithms, covered in N\&C \S\S 5.31--5.32 (pp 226--234).
+
+\textbf{\textit{QPE Problem Statement}} (based on N\&C, and the QPE page in \textit{Wikipedia} \cite{wikipedia:qpe}):
+
+\begin{adjustwidth}{0.5in}{0.5in}
+Let $U$ be a unitary operator that operates on the $m$-Qbit $\ket{u}$ such that $U\ket{u} = e^{2\pi i \varphi}\ket{u}$ --- \textit{i.e.}, $\ket{u}$ is an eigenstate of the operator $U$ with eigenvalue $e^{2\pi i \varphi}$, where $\varphi$ is an unknown real value with $0\le\varphi<1$.
+
+Goal: estimate $\varphi$ (which is then equivalent to estimating the eigenvalue $e^{2\pi i \varphi}$).
+\end{adjustwidth}
+
+\textbf{\textit{A Note on the form of the eigenvalue $e^{2\pi i \varphi}$}}
+
+Although the eigenvalue form $e^{2\pi i \varphi}$ at first seems highly specific or idiosyncratic, as pointed out in \cite{wikipedia:qpe}, the eigenvalue $\lambda_u$ associated with eigenstate $\ket{u}$ can always be written in the form $e^{2\pi i \varphi}$ because $U$ is a unitary operator over a complex vector space, so its eigenvalues must be expressible as complex numbers with modulus 1.
+
+More explicitly, suppose $\lambda_{u} = a + bi$ for real values $a$ and $b$. Then $\theta = 2\pi\varphi = \tan^{-1}(\frac{b}{a})$ gives $\varphi = \frac{1}{2\pi}\tan^{-1}(\frac{b}{a})$ (with suitable accommodations for cases where $a=0$ and using the signs of $a$ and $b$ to decide on the correct quadrant for the inverse tangent result) to produce $\lambda_{u} = a + bi = \cos(2\pi\varphi) + i\sin(2\pi\varphi) = e^{2\pi i \varphi}$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   The QPE Circuit Diagram     %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[ht]
+\captionsetup{font=small, width = 14cm}
+\centering
+\centerline{
+    \begin{quantikz}
+    % ROW 1
+    \lstick[wires=5]{First Register:\\t Qbits} &
+    \lstick{$\ket{0}$} & \gate{H} &
+        \qw & \qw & \qw & \ \ldots\ \qw & \ctrl{5} & \rstick{$\frac{1}{\sqrt{2}}(\ket{0}+e^{2\pi i (2^{t-1} \varphi)}\ket{1})$}\qw\\
+    % ROW 2
+    &\cdots & \cdots &
+        \cdots & \cdots & \cdots & \cdots & \cdots & \cdots\\
+    % ROW 3
+    &\lstick{$\ket{0}$} & \gate{H} &
+        \qw & \qw & \ctrl{3} & \ \ldots\ \qw & \qw & \rstick{$\frac{1}{\sqrt{2}}(\ket{0}+e^{2\pi i (2^2 \varphi)}\ket{1})$}\qw\\
+    % ROW 4
+    &\lstick{$\ket{0}$} & \gate{H} &
+        \qw & \ctrl{2} & \qw & \ \ldots\ \qw & \qw & \rstick{$\frac{1}{\sqrt{2}}(\ket{0}+e^{2\pi i (2^1 \varphi)}\ket{1})$}\qw\\
+    % ROW 5
+    &\lstick{$\ket{0}$} & \gate{H} &
+        \ctrl{1} & \qw & \qw & \ \ldots\ \qw & \qw & \rstick{$\frac{1}{\sqrt{2}}(\ket{0}+e^{2\pi i (2^0 \varphi)}\ket{1})$}\qw\\
+    % ROW 6
+    \lstick[wires=1]{2nd Register:\\$m$ Qbits }
+    &\lstick{$\ket{u}$} & \qwbundle[alternate]{} &
+        \gate{U^{2^0}}\qwbundle[alternate]{} & \gate{U^{2^1}}\qwbundle[alternate]{} & \gate{U^{2^2}}\qwbundle[alternate]{} & \ \ldots\ \qwbundle[alternate]{} & \gate{U^{2^{t-1}}}\qwbundle[alternate]{} & \rstick{$\ket{u}$}\qwbundle[alternate]{}
+    \end{quantikz}
+}
+\caption{The quantum circuit diagram for what Nielsen \& Chuang (2010) call the ``first stage'' of the quantum phase estimation algorithm (largely a replication of their Figure 5.2, pg 222).}
+\label{fig:QPE_circuit_diagram}
+\end{figure}
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   N&C Exercise 5.7 (pg 222)   %
