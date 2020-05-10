@@ -86,11 +86,97 @@ Let $U$ be a unitary operator that operates on the $m$-Qbit $\ket{u}$ such that 
 Goal: estimate $\varphi$ (which is then equivalent to estimating the eigenvalue $e^{2\pi i \varphi}$).
 \end{adjustwidth}
 
-\textbf{\textit{A Note on the form of the eigenvalue $e^{2\pi i \varphi}$}}
+\textbf{\textit{The eigenvalue $e^{2\pi i \varphi}$}}
 
 Although the eigenvalue form $e^{2\pi i \varphi}$ at first seems highly specific or idiosyncratic, as pointed out in \cite{wikipedia:qpe}, the eigenvalue $\lambda_u$ associated with eigenstate $\ket{u}$ can always be written in the form $e^{2\pi i \varphi}$ because $U$ is a unitary operator over a complex vector space, so its eigenvalues must be expressible as complex numbers with modulus 1.
 
 More explicitly, suppose $\lambda_{u} = a + bi$ for real values $a$ and $b$. Then $\theta = 2\pi\varphi = \tan^{-1}(\frac{b}{a})$ gives $\varphi = \frac{1}{2\pi}\tan^{-1}(\frac{b}{a})$ (with suitable accommodations for cases where $a=0$ and using the signs of $a$ and $b$ to decide on the correct quadrant for the inverse tangent result) to produce $\lambda_{u} = a + bi = \cos(2\pi\varphi) + i\sin(2\pi\varphi) = e^{2\pi i \varphi}$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   The QPE Procedure           %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item The QPE Procedure: Stage 1
+
+\begin{itemize}
+  \item[\textbf{(\textit{a})}] Registers and Initial Conditions
+  
+  \vspace{0.05in}
+  
+  The QPE algorithm utilizes 2 registers. The 1st register consists of $t$ Qbits, each initially in the state $\ket{0}$. The 2nd register consists of $m$ Qbits and is used to store the eigenstate $\ket{u}$. The circuit for the algorithm is shown in Figure (\ref{fig:QPE_circuit_diagram}) below, which is a reasonable facsimile of N\&C's Figure 5.2 (pg 222), with Qbits going from top to bottom in order of decreasing significance --- \textit{e.g.}, we''' refer to the upper-most Qbit in the 1st register at Qbit $t-1$ and the bottom-most Qbit in the 1st register as Qbit $0$.
+  
+  \vspace{0.05in}
+  
+  \item[\textbf{(\textit{b})}] Hadamard applied to 1st register
+  
+  \vspace{0.05in}
+  
+  The QPE algorithm begins with what Mermin describes as the ``standard trick'': the application of a Hadamard to each Qbit of the 1st register to produce the uniformly-weighted superposition:
+  
+  \begin{align}
+      H_{t-1}H_{t-2}\ldots H_{1}H_{0}\ket{00\ldots 00}
+      &=
+      \frac{1}{\sqrt{2}}(\ket{0} + \ket{1})
+      \frac{1}{\sqrt{2}}(\ket{0} + \ket{1})
+      \ldots
+      \frac{1}{\sqrt{2}}(\ket{0} + \ket{1})
+      \frac{1}{\sqrt{2}}(\ket{0} + \ket{1})\\
+      &=
+      \frac{1}{2^{t/2}}\sum_{x=0}^{2^t-1}\ket{x}_{t}
+  \end{align}
+  
+  \vspace{0.05in}
+  
+  \item[\textbf{(\textit{c})}] Controlled $U^{2^j}$ operations applied to the 2nd register \ldots
+  
+  \vspace{0.05in}
+  
+  The QPE algorithm continues with the successive controlled $U^{2^j}$ operations applied to the 2nd register, with each $U^{2^j}$ application being controlled by the $j$\textit{th} Qbit in the 1st register.
+  
+  \vspace{0.05in}
+  
+  To understand a bit better the eventual result in this first stage, shown along the right-hand side of Figure (\ref{fig:QPE_circuit_diagram}), consider first the process experienced by just the $0$th Qbit in the first register:
+  
+  \begin{align}
+      C_{0\ket{u}}^{U^{2^0}}H_{0}\ket{0}\ket{u}
+      &=
+      \frac{1}{\sqrt{2}}C_{0\ket{u}}^{U^{2^0}}(\ket{0} + \ket{1})\ket{u}\\
+      &=
+      \frac{1}{\sqrt{2}}C_{0\ket{u}}^{U^{2^0}}(\ket{0}\ket{u} + \ket{1}\ket{u})\\
+      &=
+      \frac{1}{\sqrt{2}}(\ket{0}\ket{u} + \ket{1}U^{2^0}\ket{u})\\
+      &=
+      \frac{1}{\sqrt{2}}(\ket{0}\ket{u} + \ket{1}e^{2\pi i (2^0 \varphi)}\ket{u})\\
+      &=
+      \frac{1}{\sqrt{2}}(\ket{0} + e^{2\pi i (2^0 \varphi)}\ket{1})\ket{u}\\
+      &=
+      \ket{\psi_0}\ket{u}
+  \end{align}
+
+where $\ket{\psi_0}$ is the result for Qbit $0$ in the 1st register, shown along the right-hand side of Figure (\ref{fig:QPE_circuit_diagram}).
+
+Then consider the next part of the process for Qbit $1$:
+
+\begin{align}
+      C_{1\ket{u}}^{U^{2^1}}H_{1}\ket{0}\ket{\psi_0}\ket{u}
+      &=
+      \frac{1}{\sqrt{2}}
+      C_{1\ket{u}}^{U^{2^1}}(\ket{0}+\ket{1})\ket{\psi_0}\ket{u}\\
+      &=
+      \frac{1}{\sqrt{2}}
+      (\ket{0}\ket{\psi_0}\ket{u}+\ket{1}\ket{\psi_0}U^{2^1}\ket{u})\\
+      &=
+      \frac{1}{\sqrt{2}}
+      (\ket{0}\ket{\psi_0}\ket{u}+\ket{1}\ket{\psi_0}e^{2\pi i (2^1 \varphi)}\ket{u})\\
+      &=
+      \frac{1}{\sqrt{2}}
+      (\ket{0}+e^{2\pi i (2^1 \varphi)}\ket{1})\ket{\psi_0}\ket{u}\\
+      &=
+      \ket{\psi_1}\ket{\psi_0}\ket{u}
+  \end{align}
+  
+  Eventually, of course, this continued process leads to the 1st-stage result of $\ket{\psi_{t-1}}\ldots\ket{\psi_1}\ket{\psi_0}\ket{u}$.
+  
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   The QPE Circuit Diagram     %
@@ -102,21 +188,21 @@ More explicitly, suppose $\lambda_{u} = a + bi$ for real values $a$ and $b$. The
 \centerline{
     \begin{quantikz}
     % ROW 1
-    \lstick[wires=5]{First Register:\\t Qbits} &
+    \lstick[wires=5]{First Register:\\$t$ Qbits} &
     \lstick{$\ket{0}$} & \gate{H} &
-        \qw & \qw & \qw & \ \ldots\ \qw & \ctrl{5} & \rstick{$\frac{1}{\sqrt{2}}(\ket{0}+e^{2\pi i (2^{t-1} \varphi)}\ket{1})$}\qw\\
+        \qw & \qw & \qw & \ \ldots\ \qw & \ctrl{5} & \rstick{$\frac{1}{\sqrt{2}}(\ket{0}+e^{2\pi i (2^{t-1} \varphi)}\ket{1})=\ket{\psi_{t-1}}$}\qw\\
     % ROW 2
     &\cdots & \cdots &
         \cdots & \cdots & \cdots & \cdots & \cdots & \cdots\\
     % ROW 3
     &\lstick{$\ket{0}$} & \gate{H} &
-        \qw & \qw & \ctrl{3} & \ \ldots\ \qw & \qw & \rstick{$\frac{1}{\sqrt{2}}(\ket{0}+e^{2\pi i (2^2 \varphi)}\ket{1})$}\qw\\
+        \qw & \qw & \ctrl{3} & \ \ldots\ \qw & \qw & \rstick{$\frac{1}{\sqrt{2}}(\ket{0}+e^{2\pi i (2^2 \varphi)}\ket{1})=\ket{\psi_2}$}\qw\\
     % ROW 4
     &\lstick{$\ket{0}$} & \gate{H} &
-        \qw & \ctrl{2} & \qw & \ \ldots\ \qw & \qw & \rstick{$\frac{1}{\sqrt{2}}(\ket{0}+e^{2\pi i (2^1 \varphi)}\ket{1})$}\qw\\
+        \qw & \ctrl{2} & \qw & \ \ldots\ \qw & \qw & \rstick{$\frac{1}{\sqrt{2}}(\ket{0}+e^{2\pi i (2^1 \varphi)}\ket{1})=\ket{\psi_1}$}\qw\\
     % ROW 5
     &\lstick{$\ket{0}$} & \gate{H} &
-        \ctrl{1} & \qw & \qw & \ \ldots\ \qw & \qw & \rstick{$\frac{1}{\sqrt{2}}(\ket{0}+e^{2\pi i (2^0 \varphi)}\ket{1})$}\qw\\
+        \ctrl{1} & \qw & \qw & \ \ldots\ \qw & \qw & \rstick{$\frac{1}{\sqrt{2}}(\ket{0}+e^{2\pi i (2^0 \varphi)}\ket{1})=\ket{\psi_0}$}\qw\\
     % ROW 6
     \lstick[wires=1]{2nd Register:\\$m$ Qbits }
     &\lstick{$\ket{u}$} & \qwbundle[alternate]{} &
@@ -127,13 +213,48 @@ More explicitly, suppose $\lambda_{u} = a + bi$ for real values $a$ and $b$. The
 \label{fig:QPE_circuit_diagram}
 \end{figure}
 
+\clearpage
 
+\item[\textbf{(\textit{d})}] Final state of 1st register at the end of 1st stage \ldots \ldots
+  
+  \vspace{0.05in}
+  
+  The final state of the 1st register at the end of this 1st stage is then:
+
+  \begin{align}
+      \label{eq:1st_stage_1st_register}
+      &\frac{1}{\sqrt{2}}\left(\ket{0}+e^{2\pi i 2^{t-1}\varphi}\ket{1}\right)
+      \otimes
+      \frac{1}{\sqrt{2}}\left(\ket{0}+e^{2\pi i 2^{t-2}\varphi}\ket{1}\right)
+      \otimes
+      \cdots
+      \otimes
+      \frac{1}{\sqrt{2}}\left(\ket{0}+e^{2\pi i 2^1\varphi}\ket{1}\right)
+      \otimes
+      \frac{1}{\sqrt{2}}\left(\ket{0}+e^{2\pi i 2^0\varphi}\ket{1}\right)\\
+      &=
+      \frac{1}{2^{t/2}}\left(
+      \ket{0}_{t}
+      + e^{2\pi i \varphi}\ket{1}_{t}
+      + e^{2\pi i (2\varphi)}\ket{2}_{t}
+      + \cdots
+      + e^{2\pi i ((2^t-1)\varphi)}\ket{2^t-1}_{t}
+      \right)\\
+      &=
+      \frac{1}{2^{t/2}}
+      \sum_{k=0}^{2^t-1}
+      e^{2\pi i k\varphi}\ket{k}_{t}
+  \end{align}
+  
+  where the subscript $t$ is a reminder we are working over a $t$-Qbit register.
+  
+\end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   N&C Exercise 5.7 (pg 222)   %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\item Nielsen \& Chuang's Exercise 5.7 (pg 222):
+\item Intercalary: Nielsen \& Chuang's Exercise 5.7 (pg 222):
 \vspace{0.1in}
 \begin{adjustwidth}{100pt}{100pt}
 \begin{mdframed}[hidealllines=true, backgroundcolor=gray!20]
@@ -155,7 +276,7 @@ Then the effect of the sequence of controlled-$U$ operations like that in Figure
     &\mapsto
     \ket{j}\prod_{i=0}^{t-1}{e^{2\pi i (\alpha_i 2^i \varphi)}}\ket{u}
 \end{align}
-because for each non-zero $\alpha_i$ in the expansion of $j$, we will obtain a (non-unitary) factor of $e^{2\pi i (2^i \varphi)}$. The product of the exponential functions can be re-expressed as sum in the exponent, where the sum is exactly our formula for $j$: 
+because for each non-zero $\alpha_i$ in the expansion of $j$, we will obtain a (non-unitary) factor of $e^{2\pi i (2^i \varphi)}$. The product of the exponential functions can be re-expressed as a sum in the exponent, where the sum is exactly our formula for $j$: 
 \begin{align}
     \ket{j}\prod_{i=0}^{t-1}{e^{2\pi i (\alpha_i 2^i \varphi)}}\ket{u}
     &=
@@ -217,6 +338,95 @@ Some simple concrete examples of this result are shown worked out from scratch i
     \caption{Examples of results for Exercise 5.7, with $j$ defined on 3 Qbits.}
     \label{table:Prob_5.7}
 \end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   Inverse Fourier Transform   %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\item 2nd Stage: Applying the Inverse Fourier Transform (and N\&C's Eqs 5.21–5.22)
+
+\vspace{0.1in}
+
+Suppose for the moment that our phase $\varphi$ can be represented exactly with our $t$ bits in the first register and so we can express our phase in binary decimal form as $\varphi = 0.\varphi_1 \varphi_2 \ldots \varphi_{t-1}\varphi_{t}$, where each $\varphi_{i}\in\{0, 1\}$ --- that is, the phase $\varphi$ can be expressed as:
+
+\begin{align}
+    \varphi
+    &=
+    \frac{\varphi_1}{2^1} + \frac{\varphi_2}{2^2}
+    + \cdots + \frac{\varphi_{t-1}}{2^{t-1}}
+    + \frac{\varphi_{t}}{2^{t}}\\
+    &=
+    \sum_{j=1}^{t} \varphi_{j} 2^{-j}
+\end{align}
+
+Then, as shown in N\&C's Eq 5.21 (pg 22), the first register state in expression (\ref{eq:1st_stage_1st_register}) resulting from the first stage of processing can be re-expressed as:
+\begin{align}
+&\begin{multlined}
+    \frac{1}{2^{t/2}}\left(\ket{0}+e^{2\pi i 2^{t-1}(0.\varphi_1\varphi_2\ldots\varphi_{t})}\ket{1}\right)
+      \left(\ket{0}+e^{2\pi i 2^{t-2}(0.\varphi_1\varphi_2\ldots\varphi_{t})}\ket{1}\right)
+      \cdots\\
+      \left(\ket{0}+e^{2\pi i 2^{1} (0.\varphi_{1}\varphi_2\ldots\varphi_{t})}\ket{1}\right)
+      \left(\ket{0}+e^{2\pi i 2^0 (0.\varphi_1\varphi_2\ldots\varphi_{t})}\ket{1}\right)
+\end{multlined}\\
+&=
+\begin{multlined}
+    \frac{1}{2^{t/2}}\left(\ket{0}+e^{2\pi i (\varphi_1\varphi_2\ldots\varphi_{t-1}.\varphi_{t})}\ket{1}\right)
+      \left(\ket{0}+e^{2\pi i (\varphi_1\varphi_2\ldots.\varphi_{t-1}\varphi_{t})}\ket{1}\right)
+      \cdots\\
+      \left(\ket{0}+e^{2\pi i (\varphi_{1}.\varphi_2\ldots\varphi_{t})}\ket{1}\right)
+      \left(\ket{0}+e^{2\pi i (0.\varphi_1\varphi_2\ldots\varphi_{t})}\ket{1}\right)
+\end{multlined}\label{eq:leading_digit_not_dropped}\\
+&=
+    \frac{1}{2^{t/2}}\left(\ket{0}+e^{2\pi i (0.\varphi_{t})}\ket{1}\right)
+      \left(\ket{0}+e^{2\pi i (0.\varphi_{t-1}\varphi_{t})}\ket{1}\right)
+      \cdots
+      \left(\ket{0}+e^{2\pi i (0.\varphi_2\ldots\varphi_{t})}\ket{1}\right)
+      \left(\ket{0}+e^{2\pi i (0.\varphi_1\varphi_2\ldots\varphi_{t})}\ket{1}\right)\label{eq:leading_digit_dropped}
+\end{align}
+where the leading digits are gradually ``dropped'' from the expression for $\varphi$ as we apply successive multiplications by $2$. Since it may not be obvious how/why we can simply drop those leading $\varphi_j$ digits with each successive multiplication by a factor of 2 in the exponential function, it is worth considering the step from the expression in (\ref{eq:leading_digit_not_dropped}) to expression (\ref{eq:leading_digit_dropped}), for the exponential function in just the second-to-last right-hand term:
+\begin{align}
+    e^{2\pi i 2^1 (0.\varphi_{1}\varphi_2\ldots\varphi_{t})}
+    &=
+    e^{2\pi i (\varphi_{1}.\varphi_2\ldots\varphi_{t})}\\
+    &=
+    e^{2\pi i (\varphi_{1} + 0.\varphi_2\ldots\varphi_{t})}\\
+    &=
+    e^{2\pi i (\varphi_{1})}
+    e^{2\pi i ( 0.\varphi_2\ldots\varphi_{t})}\\
+    &=
+    (1)
+    e^{2\pi i ( 0.\varphi_2\ldots\varphi_{t})}\\
+    &=
+    e^{2\pi i ( 0.\varphi_2\ldots\varphi_{t})}
+\end{align}
+
+In other words, since $e^{2\pi i \varphi_j} = 1$ whenever $\varphi\in \{0, 1\}$, those leading digits $\varphi_j$ each time just produce another factor of $1$ each time and can be removed.
+
+\vspace{0.1in}
+
+What's beautiful about the resulting expression in (\ref{eq:leading_digit_dropped}), though, is that it matches the quantum Fourier transform output shown in N\&C's Eq (5.4) (pg 218):
+
+\begin{align}
+    \ket{j_1, j_2, \ldots, j_n}
+    \xrightarrow{QFT}
+    \frac{1}{2^{t/2}}\left(\ket{0}+e^{2\pi i (0.j_n)}\ket{1}\right)
+      \left(\ket{0}+e^{2\pi i (0.j_{n-1}j_{n})}\ket{1}\right)
+      \cdots
+      \left(\ket{0}+e^{2\pi i (0.j_1 j_2\cdots j_{n})}\ket{1}\right)
+\end{align}
+
+Thus applying the inverse quantum Fourier transform to our 1st-stage 1st-register result gives us:
+
+\begin{align}
+    \frac{1}{2^{t/2}}\left(\ket{0}+e^{2\pi i (0.\varphi_{t})}\ket{1}\right)
+      \left(\ket{0}+e^{2\pi i (0.\varphi_{t-1}\varphi_{t})}\ket{1}\right)
+      \cdots
+      \left(\ket{0}+e^{2\pi i (0.\varphi_1\varphi_2\ldots\varphi_{t})}\ket{1}\right)
+    \xrightarrow{QFT^{-1}}
+    \ket{\varphi_1\varphi_2\ldots\varphi_{t}}
+\end{align}
+
+and thus (as Nielsen \& Chuang point out at the bottom of pg 222), a measurement in the computational basis gives us $\varphi$ exactly.
 
 \clearpage
 
