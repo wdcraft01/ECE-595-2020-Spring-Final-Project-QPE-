@@ -339,9 +339,11 @@ Some simple concrete examples of this result are shown worked out from scratch i
     \label{table:Prob_5.7}
 \end{table}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   Inverse Fourier Transform   %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   Inverse Fourier Transform       %
+%   when phase phi can be expressed %
+%   exactly in t (or fewer) Qbits   %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \item 2nd Stage: Applying the Inverse Fourier Transform (and N\&C's Eqs 5.21–5.22)
 
@@ -426,9 +428,212 @@ Thus applying the inverse quantum Fourier transform to our 1st-stage 1st-registe
     \ket{\varphi_1\varphi_2\ldots\varphi_{t}}
 \end{align}
 
-and thus (as Nielsen \& Chuang point out at the bottom of pg 222), a measurement in the computational basis gives us $\varphi$ exactly.
+and thus (as Nielsen \& Chuang point out at the bottom of pg 222), a measurement in the computational basis gives us $\varphi$ exactly (when $\varphi$ could be expressed exactly in the $t$ or fewer Qbits available in the first register).
 
-\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   Inverse Fourier Transform       %
+%   when phase phi can only be      %
+%   approximated in t Qbits         %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\item 2nd Stage: Applying the Inverse Fourier Transform when $\varphi$ can only be approximated in the available $t$ Qbits
+
+\vspace{0.1in}
+
+Here we diverge a bit from Nielsen \& Chuang's presentation and take our cue from the presentation in the \textit{Wikipedia} presention on this same topic \cite{wikipedia:qpe}.
+
+Recall that the state of the first register at the end of Stage 1 (just before the inverse Fourier transform) is given by:
+\begin{align}
+    \frac{1}{2^{t/2}}
+      \sum_{k=0}^{2^t-1}
+      e^{2\pi i k\varphi}\ket{k}_{t}
+\end{align}
+Applying the inverse Fourier transform then gives:
+\begin{align}
+    \mathscr{F}^{-1}\left\{\frac{1}{2^{t/2}}
+      \sum_{k=0}^{2^t-1}
+      e^{2\pi i k\varphi}\ket{k}_{t}\right\}
+      &=
+      \frac{1}{2^{t/2}}
+      \sum_{k=0}^{2^t-1}
+      e^{2\pi i k\varphi}\ket{k}_{t}
+      \frac{1}{2^{t/2}}
+      \sum_{x=0}^{2^t-1}
+      e^{\frac{-2\pi i kx}{2^t}} \ket{x}\\
+      &=
+      \frac{1}{2^t}
+      \sum_{x=0}^{2^t-1}
+      \sum_{k=0}^{2^t-1}
+      e^{2\pi i k\varphi}\ket{k}_{t}
+      e^{\frac{-2\pi i kx}{2^t}} \ket{x} \hspace{0.1in}\text{\scriptsize [combine coeffs and rearrange summations]}\\
+      &=
+      \frac{1}{2^t}
+      \sum_{x=0}^{2^t-1}
+      \sum_{k=0}^{2^t-1}
+      e^{\frac{-2\pi i k}{2^t}(x-2^{t}\varphi)} \ket{x} \hspace{0.1in}\text{\scriptsize [combine exponents]}
+\end{align}
+
+Recall now that $\varphi = 0.\varphi_{1}\varphi_{2}\varphi_{3}\ldots\varphi_{t-1}\varphi_{t}\varphi_{t+1}\ldots \in [0, 1]$ (because we now require more than $t$ bits to represent $\varphi$). We could thus approximate $\varphi$ by rounding to the nearest integer the value $2^t\varphi = \varphi_{1}\varphi_{2}\varphi_{3}\ldots\varphi_{t-1}\varphi_{t}.\varphi_{t+1}\ldots$, and using the resulting value $\tilde{\varphi} = \frac{\varphi_{1}^{\prime}\varphi_{2}^{\prime}\varphi_{3}^{\prime}\ldots\varphi_{t-1}^{\prime}\varphi_{t}^{\prime}}{2^t}$ as our estimate for $\varphi$. So we take $2^t\varphi = a + 2^t\delta$, where $a$ is the nearest integer to $2^t\varphi$ and $0 \le |2^t\delta| \le \frac{1}{2}$.
+
+We can then re-express the post-inverse Fourier transform state of the first register as (see the ``Phase approximation representation'' section of \cite{wikipedia:qpe}):
+\begin{align}
+    \frac{1}{2^t}
+      \sum_{x=0}^{2^t-1}
+      \sum_{k=0}^{2^t-1}
+      e^{\frac{-2\pi i k}{2^t}(x-2^{t}\varphi)} \ket{x}
+    &=
+    \frac{1}{2^t}
+      \sum_{x=0}^{2^t-1}
+      \sum_{k=0}^{2^t-1}
+      e^{\frac{-2\pi i k}{2^t}(x-(a+2^{t}\delta))} \ket{x}\\
+    &=
+    \frac{1}{2^t}
+      \sum_{x=0}^{2^t-1}
+      \sum_{k=0}^{2^t-1}
+      e^{\frac{-2\pi i k}{2^t}((x-a)-2^{t}\delta)} \ket{x}\\
+    &=
+    \frac{1}{2^t}
+      \sum_{x=0}^{2^t-1}
+      \sum_{k=0}^{2^t-1}
+      e^{\frac{-2\pi i k}{2^t}(x-a)}
+      e^{2\pi i k\delta}
+      \ket{x}\\
+    &=
+    A
+\end{align}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   Measure of approx'd phi         %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\item 3rd Stage: Measuring First Register in Computational Basis (see the ``Measurement'' section in \cite{wikipedia:qpe})
+
+\vspace{0.1in}
+
+When we now perform a measurement on the first register in the computational basis, we obtain the integer value $a$ with probability given by:
+\begin{align}
+    p(a)
+    &=
+    |\braket{a}{A}|^{2}\\
+    &=
+    \left|\matrixel{a}{\frac{1}{2^t}
+      \sum_{x=0}^{2^t-1}
+      \sum_{k=0}^{2^t-1}
+      e^{\frac{-2\pi i k}{2^t}(x-a)}
+      e^{2\pi i k\delta}}{x}\right|^{2}\\
+    &=
+    (\frac{1}{2^t})^2
+    \left|
+      \sum_{x=0}^{2^t-1}
+      \sum_{k=0}^{2^t-1}
+      e^{\frac{-2\pi i k}{2^t}(x-a)}
+      e^{2\pi i k\delta}\bra{a}\ket{x}
+    \right|^{2}
+\end{align}
+and there when summing over $x$, the only non-zero term occurs when $x=a$ (when $\bra{a}\ket{x}=\bra{a}\ket{a}=1$, otherwise $\bra{a}\ket{x} = 0$). Thus we have:
+\begin{align}
+    p(a)
+    &=
+    \frac{1}{2^{2t}}
+    \left|
+      \sum_{k=0}^{2^t-1}
+      e^{2\pi i k\delta}
+    \right|^{2}
+\end{align}
+
+Notice that when $\delta=0$ (and $\varphi$ can be exactly represented with the $t$ bits in the first register), we get:
+\begin{align}
+    p(a)\rvert_{\delta=0}
+    &=
+    \frac{1}{2^{2t}}
+    \left|
+      \sum_{k=0}^{2^t-1}
+      1
+    \right|^{2}
+    =
+    \frac{1}{2^{2t}}(2^t)^2 = 1
+\end{align}
+
+Thus when $2^t \varphi = a$, we obtain the exact value for $2^t \varphi$ with the first register giving $\ket{\varphi_1\varphi_2\ldots\varphi_t}$ and measured as such with probability 1, consistent with our earlier result when we assumed that $\varphi$ could be represented exactly within the $t$ bits of the first register.
+
+If $\delta\ne 0$, the summation term can be interpreted as a truncated geometric series of the form $\sum_{j=0}^{N}cr^k$, with constant coefficient $c=1$ and ratio $r = e^{2\pi i\delta}$, and thus:
+
+\begin{align}
+    \sum_{k=0}^{2^t-1} e^{2\pi i k\delta}
+    &=
+    \sum_{k=0}^{2^t-1} (e^{2\pi i \delta})^k
+    =
+    \frac{1-(e^{2\pi i \delta})^{2t}}
+    {1-(e^{2\pi i \delta})}
+    =
+    \frac{1-e^{2\pi i 2^t \delta}}
+    {1-e^{2\pi i \delta}}
+\end{align}
+Plugging back into our formula for $p(a)$, then, for $\delta\ne 0$ we have:
+\begin{align}
+    p(a)\rvert_{\delta\ne 0}
+    &=
+    \frac{1}{2^{2t}}
+    \left|
+      \frac{1-e^{2\pi i 2^t \delta}}
+    {1-e^{2\pi i \delta}}
+    \right|^{2}
+\end{align}
+Interestingly, we can give a lower bound on this probability for obtaining such an estimate for $\varphi$, as developed at the end of \cite{wikipedia:qpe}:
+\begin{align}
+    p(a)\rvert_{\delta\ne 0}
+    &=
+    \frac{1}{2^{2t}}
+    \left|
+      \frac{1-e^{2\pi i 2^t \delta}}
+    {1-e^{2\pi i \delta}}
+    \right|^{2}
+    =
+    \frac{1}{2^{2t}}
+    \left|
+      \frac{2\sin(\pi 2^t \delta)}
+    {2\sin(\pi \delta)}
+    \right|^2
+\end{align}
+because
+\begin{align}
+    |1 - e^{2ix}|^2
+    &=
+    |1 - (\cos(2x)+i\sin(2x))|^2\\
+    &=
+    |(1 - \cos(2x)) - i\sin(2x)|^2\\
+    &=
+    |2\sin^{2}(x) - i(2\sin(x)\cos(x))|^2\\
+    &=
+    4\sin^{4}(x) + 4\sin^{2}(x)\cos^{2}(x)\\
+    &=
+    4\sin^{2}(x)\left(\sin^{2}(x) + \cos^{2}(x)\right)\\
+    &=
+    4\sin^{2}(x) = |2\sin(x)|^2
+\end{align}
+
+Then:
+\begin{align}
+    p(a)\rvert_{\delta\ne 0}
+    &=
+    \frac{1}{2^{2t}}
+    \frac{|2\sin(\pi 2^t \delta)|^2}
+    {|2\sin(\pi \delta)|^2}\\
+    &\ge
+    \frac{1}{2^{2t}}
+    \frac{|\sin(\pi 2^t \delta)|^2}
+    {|\pi \delta|^2} &
+    \text{because }|\sin(\pi \delta)| \le |\pi\delta| \text{ for small } \delta\\
+    &\ge
+    \frac{1}{2^{2t}}
+    \frac{|2\cdot 2^t \delta|^2}
+    {|\pi \delta|^2} &
+    \text{because }|2\cdot 2^t \delta| \le |\sin(|2\cdot 2^t \delta|)| \text{ for } \delta\le\frac{1}{2^{t+1}}\\
+    &=
+    \frac{4}{\pi^2} \approx 0.4053
+\end{align}
+Thus we have over a 40\% probability of measuring the best $t$-bit estimate of $2^n\varphi$ (and thus $\varphi$) when $\varphi$ cannot be represented exactly in the $t$ Qbits of the first register.
+
 
 % \clearpage
 \end{enumerate}
