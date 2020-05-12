@@ -4,7 +4,7 @@
 \pagestyle{fancy}
 \lhead{}
 \chead{}
-\rhead{Warren D. (Hoss) Craft Final Project ECE 595}
+\rhead{Warren D. Craft Final Project ECE 595}
 \lfoot{}
 \cfoot{\thepage}
 \rfoot{}
@@ -59,22 +59,23 @@
 % For shading paragraph boxes
 \usepackage[framemethod=tikz]{mdframed}
 
-\title{ECE 595: Introduction to Quantum Computing\\
-Final Project: Review of Quantum Phase Estimation}
+\title{An Introductory Review of Quantum Phase Estimation\\[0.1in]{\large A Final Homework Project for ECE 595: Introduction to Quantum Computing}}
+% \title{Experimental Test\\[0.2em]\smaller{}Stimuli generation}
 \author{Warren D. (Hoss) Craft}
 \date{Tues 5/12/2020}
 
 \begin{document}
 \maketitle
-%\tableofcontents
 
 \flushleft
 
-Note: References throughout the homework to ``Mermin'' refer to Mermin's (2007) \textit{Quantum Computer Science: An Introduction} \cite{Mermin_2007}, and references to ``Nielsen \& Chuang'' or just ``N\&C'' refer to Nielsen \& Chuang's (2010) \textit{Quantum Computation and Quantum Information (10th Anniversary Edition)} \cite{Nielsen_&_Chuang_2010}, and further bracketed citations are omitted.
+Note: References throughout the homework to ``Mermin'' refer to Mermin's (2007) \textit{Quantum Computer Science: An Introduction} \cite{Mermin_2007}, and references to ``Nielsen \& Chuang'' or just ``N\&C'' refer to Nielsen \& Chuang's (2010) \textit{Quantum Computation and Quantum Information (10th Anniversary Edition)} \cite{Nielsen_&_Chuang_2010}, and further bracketed citations are omitted. The review coverage in this document is based mostly on Nielsen \& Chuang's (2010) treatment, complemented by substantive use of the \textit{Wikipedia} entry on quantum phase estimation \cite{wikipedia:qpe} (particularly the sections devoted to the approximated $\varphi$ case), and to a lesser extent on content found in Mermin (2007).
+
+\vspace{0.25in}
 
 \begin{enumerate}[label=\textbf{(\arabic*)}]
 
-\item Intro
+\item Introduction: The Quantum Phase Estimation Problem
 
 Nielsen \& Chuang (2010) segue from the quantum Fourier transform to quantum phase estimation (QPE) by remarking that ``The Fourier transform is the key to a general procedure known as phase estimation, which in turn is the key for many quantum algorithms'' (pg 221). Among the many quantum algorithms for which QPE is key are the quantum order-finding and quantum factoring algorithms, covered in N\&C \S\S 5.31--5.32 (pp 226--234).
 
@@ -88,7 +89,7 @@ Goal: estimate $\varphi$ (which is then equivalent to estimating the eigenvalue 
 
 \textbf{\textit{The eigenvalue $e^{2\pi i \varphi}$}}
 
-Although the eigenvalue form $e^{2\pi i \varphi}$ at first seems highly specific or idiosyncratic, as pointed out in \cite{wikipedia:qpe}, the eigenvalue $\lambda_u$ associated with eigenstate $\ket{u}$ can always be written in the form $e^{2\pi i \varphi}$ because $U$ is a unitary operator over a complex vector space, so its eigenvalues must be expressible as complex numbers with modulus 1.
+The eigenvalue form $e^{2\pi i \varphi}$ might first seems highly idiosyncratic. As pointed out in \cite{wikipedia:qpe}, though, the eigenvalue $\lambda_u$ associated with eigenstate $\ket{u}$ can always be written in the form $e^{2\pi i \varphi}$ because $U$ is a unitary operator over a complex vector space, so its eigenvalues must be expressible as complex numbers with modulus 1.
 
 More explicitly, suppose $\lambda_{u} = a + bi$ for real values $a$ and $b$. Then $\theta = 2\pi\varphi = \tan^{-1}(\frac{b}{a})$ gives $\varphi = \frac{1}{2\pi}\tan^{-1}(\frac{b}{a})$ (with suitable accommodations for cases where $a=0$ and using the signs of $a$ and $b$ to decide on the correct quadrant for the inverse tangent result) to produce $\lambda_{u} = a + bi = \cos(2\pi\varphi) + i\sin(2\pi\varphi) = e^{2\pi i \varphi}$.
 
@@ -102,7 +103,7 @@ More explicitly, suppose $\lambda_{u} = a + bi$ for real values $a$ and $b$. The
   
   \vspace{0.05in}
   
-  The QPE algorithm utilizes 2 registers. The 1st register consists of $t$ Qbits, each initially in the state $\ket{0}$. The 2nd register consists of $m$ Qbits and is used to store the eigenstate $\ket{u}$. The circuit for the algorithm is shown in Figure (\ref{fig:QPE_circuit_diagram}) below, which is a reasonable facsimile of N\&C's Figure 5.2 (pg 222), with Qbits going from top to bottom in order of decreasing significance --- \textit{e.g.}, we''' refer to the upper-most Qbit in the 1st register at Qbit $t-1$ and the bottom-most Qbit in the 1st register as Qbit $0$.
+  The QPE algorithm utilizes 2 registers. The 1st register consists of $t$ Qbits, each initially in the state $\ket{0}$. The 2nd register consists of $m$ Qbits and is used to store the eigenstate $\ket{u}$. The circuit for the algorithm is shown in Figure (\ref{fig:QPE_circuit_diagram}) below, which is a reasonable facsimile of N\&C's Figure 5.2 (pg 222), with Qbits going from top to bottom in order of decreasing significance --- \textit{e.g.}, we refer to the upper-most Qbit in the 1st register in Figure (\ref{fig:QPE_circuit_diagram}) as Qbit $t-1$ and the bottom-most Qbit in the 1st register as Qbit $0$.
   
   \vspace{0.05in}
   
@@ -113,18 +114,57 @@ More explicitly, suppose $\lambda_{u} = a + bi$ for real values $a$ and $b$. The
   The QPE algorithm begins with what Mermin describes as the ``standard trick'': the application of a Hadamard to each Qbit of the 1st register to produce the uniformly-weighted superposition:
   
   \begin{align}
-      H_{t-1}H_{t-2}\ldots H_{1}H_{0}\ket{00\ldots 00}
+      H_{t-1}H_{t-2}\ldots H_{1}H_{0}\ket{0\ldots 00}
       &=
       \frac{1}{\sqrt{2}}(\ket{0} + \ket{1})
-      \frac{1}{\sqrt{2}}(\ket{0} + \ket{1})
+      \otimes
       \ldots
+      \otimes
       \frac{1}{\sqrt{2}}(\ket{0} + \ket{1})
+      \otimes
       \frac{1}{\sqrt{2}}(\ket{0} + \ket{1})\\
       &=
       \frac{1}{2^{t/2}}\sum_{x=0}^{2^t-1}\ket{x}_{t}
   \end{align}
   
-  \vspace{0.05in}
+\vspace{0.25in}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   The QPE Circuit Diagram     %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[ht]
+\captionsetup{font=small, width = 14cm}
+\centering
+\centerline{
+    \begin{quantikz}
+    % ROW 1
+    \lstick[wires=5]{First Register:\\$t$ Qbits} &
+    \lstick{$\ket{0}$} & \gate{H} &
+        \qw & \qw & \qw & \ \ldots\ \qw & \ctrl{5} & \rstick{$\frac{1}{\sqrt{2}}(\ket{0}+e^{2\pi i (2^{t-1} \varphi)}\ket{1})=\ket{\psi_{t-1}}$}\qw\\
+    % ROW 2
+    &\vdots & \vdots &
+        \vdots & \vdots & \vdots & \vdots & \vdots & \vdots\\
+    % ROW 3
+    &\lstick{$\ket{0}$} & \gate{H} &
+        \qw & \qw & \ctrl{3} & \ \ldots\ \qw & \qw & \rstick{$\frac{1}{\sqrt{2}}(\ket{0}+e^{2\pi i (2^2 \varphi)}\ket{1})=\ket{\psi_2}$}\qw\\
+    % ROW 4
+    &\lstick{$\ket{0}$} & \gate{H} &
+        \qw & \ctrl{2} & \qw & \ \ldots\ \qw & \qw & \rstick{$\frac{1}{\sqrt{2}}(\ket{0}+e^{2\pi i (2^1 \varphi)}\ket{1})=\ket{\psi_1}$}\qw\\
+    % ROW 5
+    &\lstick{$\ket{0}$} & \gate{H} &
+        \ctrl{1} & \qw & \qw & \ \ldots\ \qw & \qw & \rstick{$\frac{1}{\sqrt{2}}(\ket{0}+e^{2\pi i (2^0 \varphi)}\ket{1})=\ket{\psi_0}$}\qw\\
+    % ROW 6
+    \lstick[wires=1]{2nd Register:\\$m$ Qbits }
+    &\lstick{$\ket{u}$} & \qwbundle[alternate]{} &
+        \gate{U^{2^0}}\qwbundle[alternate]{} & \gate{U^{2^1}}\qwbundle[alternate]{} & \gate{U^{2^2}}\qwbundle[alternate]{} & \ \ldots\ \qwbundle[alternate]{} & \gate{U^{2^{t-1}}}\qwbundle[alternate]{} & \rstick{$\ket{u}$}\qwbundle[alternate]{}
+    \end{quantikz}
+}
+\caption{The quantum circuit diagram for what Nielsen \& Chuang (2010) call the ``first stage'' of the quantum phase estimation algorithm (largely a replication of their Figure 5.2, pg 222).}
+\label{fig:QPE_circuit_diagram}
+\end{figure}
+
+\vspace{0.25in}
   
   \item[\textbf{(\textit{c})}] Controlled $U^{2^j}$ operations applied to the 2nd register \ldots
   
@@ -173,47 +213,12 @@ Then consider the next part of the process for Qbit $1$:
       &=
       \ket{\psi_1}\ket{\psi_0}\ket{u}
   \end{align}
-  
+
+\vspace{0.1in}
+
   Eventually, of course, this continued process leads to the 1st-stage result of $\ket{\psi_{t-1}}\ldots\ket{\psi_1}\ket{\psi_0}\ket{u}$.
-  
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   The QPE Circuit Diagram     %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{figure}[ht]
-\captionsetup{font=small, width = 14cm}
-\centering
-\centerline{
-    \begin{quantikz}
-    % ROW 1
-    \lstick[wires=5]{First Register:\\$t$ Qbits} &
-    \lstick{$\ket{0}$} & \gate{H} &
-        \qw & \qw & \qw & \ \ldots\ \qw & \ctrl{5} & \rstick{$\frac{1}{\sqrt{2}}(\ket{0}+e^{2\pi i (2^{t-1} \varphi)}\ket{1})=\ket{\psi_{t-1}}$}\qw\\
-    % ROW 2
-    &\cdots & \cdots &
-        \cdots & \cdots & \cdots & \cdots & \cdots & \cdots\\
-    % ROW 3
-    &\lstick{$\ket{0}$} & \gate{H} &
-        \qw & \qw & \ctrl{3} & \ \ldots\ \qw & \qw & \rstick{$\frac{1}{\sqrt{2}}(\ket{0}+e^{2\pi i (2^2 \varphi)}\ket{1})=\ket{\psi_2}$}\qw\\
-    % ROW 4
-    &\lstick{$\ket{0}$} & \gate{H} &
-        \qw & \ctrl{2} & \qw & \ \ldots\ \qw & \qw & \rstick{$\frac{1}{\sqrt{2}}(\ket{0}+e^{2\pi i (2^1 \varphi)}\ket{1})=\ket{\psi_1}$}\qw\\
-    % ROW 5
-    &\lstick{$\ket{0}$} & \gate{H} &
-        \ctrl{1} & \qw & \qw & \ \ldots\ \qw & \qw & \rstick{$\frac{1}{\sqrt{2}}(\ket{0}+e^{2\pi i (2^0 \varphi)}\ket{1})=\ket{\psi_0}$}\qw\\
-    % ROW 6
-    \lstick[wires=1]{2nd Register:\\$m$ Qbits }
-    &\lstick{$\ket{u}$} & \qwbundle[alternate]{} &
-        \gate{U^{2^0}}\qwbundle[alternate]{} & \gate{U^{2^1}}\qwbundle[alternate]{} & \gate{U^{2^2}}\qwbundle[alternate]{} & \ \ldots\ \qwbundle[alternate]{} & \gate{U^{2^{t-1}}}\qwbundle[alternate]{} & \rstick{$\ket{u}$}\qwbundle[alternate]{}
-    \end{quantikz}
-}
-\caption{The quantum circuit diagram for what Nielsen \& Chuang (2010) call the ``first stage'' of the quantum phase estimation algorithm (largely a replication of their Figure 5.2, pg 222).}
-\label{fig:QPE_circuit_diagram}
-\end{figure}
-
-\clearpage
+\vspace{0.1in}
 
 \item[\textbf{(\textit{d})}] Final state of 1st register at the end of 1st stage \ldots \ldots
   
@@ -250,6 +255,8 @@ Then consider the next part of the process for Qbit $1$:
   
 \end{itemize}
 
+\vspace{0.1in}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   N&C Exercise 5.7 (pg 222)   %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -276,7 +283,7 @@ Then the effect of the sequence of controlled-$U$ operations like that in Figure
     &\mapsto
     \ket{j}\prod_{i=0}^{t-1}{e^{2\pi i (\alpha_i 2^i \varphi)}}\ket{u}
 \end{align}
-because for each non-zero $\alpha_i$ in the expansion of $j$, we will obtain a (non-unitary) factor of $e^{2\pi i (2^i \varphi)}$. The product of the exponential functions can be re-expressed as a sum in the exponent, where the sum is exactly our formula for $j$: 
+because for each non-zero $\alpha_i$ in the expansion of $j$, we will obtain a (non-unitary) factor of $e^{2\pi i (2^i \varphi)} = e^{2\pi i (\alpha_i 2^i \varphi)}$. The product of the exponential functions can be re-expressed as a sum in the exponent, where the sum is exactly our formula for $j$: 
 \begin{align}
     \ket{j}\prod_{i=0}^{t-1}{e^{2\pi i (\alpha_i 2^i \varphi)}}\ket{u}
     &=
@@ -291,6 +298,8 @@ because for each non-zero $\alpha_i$ in the expansion of $j$, we will obtain a (
 where in the end we used the fact that $U\ket{u} = e^{2\pi i \varphi}\ket{u}$ and thus $U^{j}\ket{u} = (e^{2\pi i \varphi})^j\ket{u}$.
 
 Some simple concrete examples of this result are shown worked out from scratch in Table \ref{table:Prob_5.7} for $j$ defined on $t=3$ Qbits.
+
+\vspace{0.2in}
 
 \begin{table}[th]
     \captionsetup{font=small, width = 14cm}
@@ -335,9 +344,11 @@ Some simple concrete examples of this result are shown worked out from scratch i
         \\[5pt]
         \hline
         \end{tabular}
-    \caption{Examples of results for Exercise 5.7, with $j$ defined on 3 Qbits.}
+    \caption{Examples of results for Exercise 5.7, with $\ket{j}$ defined on 3 Qbits.}
     \label{table:Prob_5.7}
 \end{table}
+
+\vspace{0.2in}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Inverse Fourier Transform       %
@@ -347,10 +358,9 @@ Some simple concrete examples of this result are shown worked out from scratch i
 
 \item 2nd Stage: Applying the Inverse Fourier Transform (and N\&C's Eqs 5.21–5.22)
 
-\vspace{0.1in}
+\vspace{0.05in}
 
 Suppose for the moment that our phase $\varphi$ can be represented exactly with our $t$ bits in the first register and so we can express our phase in binary decimal form as $\varphi = 0.\varphi_1 \varphi_2 \ldots \varphi_{t-1}\varphi_{t}$, where each $\varphi_{i}\in\{0, 1\}$ --- that is, the phase $\varphi$ can be expressed as:
-
 \begin{align}
     \varphi
     &=
@@ -385,7 +395,9 @@ Then, as shown in N\&C's Eq 5.21 (pg 22), the first register state in expression
       \left(\ket{0}+e^{2\pi i (0.\varphi_2\ldots\varphi_{t})}\ket{1}\right)
       \left(\ket{0}+e^{2\pi i (0.\varphi_1\varphi_2\ldots\varphi_{t})}\ket{1}\right)\label{eq:leading_digit_dropped}
 \end{align}
-where the leading digits are gradually ``dropped'' from the expression for $\varphi$ as we apply successive multiplications by $2$. Since it may not be obvious how/why we can simply drop those leading $\varphi_j$ digits with each successive multiplication by a factor of 2 in the exponential function, it is worth considering the step from the expression in (\ref{eq:leading_digit_not_dropped}) to expression (\ref{eq:leading_digit_dropped}), for the exponential function in just the second-to-last right-hand term:
+where the leading digits are gradually ``dropped'' from the expression for $\varphi$ as we apply successive multiplications by $2$.
+
+Since it may not be obvious how/why we can simply drop those leading $\varphi_j$ digits with each successive multiplication by a factor of 2 in the exponential function, it is worth considering the step from the expression in (\ref{eq:leading_digit_not_dropped}) to expression (\ref{eq:leading_digit_dropped}), for the exponential function in just the second-to-last right-hand term:
 \begin{align}
     e^{2\pi i 2^1 (0.\varphi_{1}\varphi_2\ldots\varphi_{t})}
     &=
@@ -406,7 +418,7 @@ In other words, since $e^{2\pi i \varphi_j} = 1$ whenever $\varphi\in \{0, 1\}$,
 
 \vspace{0.1in}
 
-What's beautiful about the resulting expression in (\ref{eq:leading_digit_dropped}), though, is that it matches the quantum Fourier transform output shown in N\&C's Eq (5.4) (pg 218):
+What's beautiful about the resulting expression in (\ref{eq:leading_digit_dropped}) is that it matches the quantum Fourier transform output shown in N\&C's Eq (5.4) (pg 218):
 
 \begin{align}
     \ket{j_1, j_2, \ldots, j_n}
@@ -428,7 +440,7 @@ Thus applying the inverse quantum Fourier transform to our 1st-stage 1st-registe
     \ket{\varphi_1\varphi_2\ldots\varphi_{t}}
 \end{align}
 
-and thus (as Nielsen \& Chuang point out at the bottom of pg 222), a measurement in the computational basis gives us $\varphi$ exactly (when $\varphi$ could be expressed exactly in the $t$ or fewer Qbits available in the first register).
+and as Nielsen \& Chuang point out at the bottom of pg 222, a measurement in the computational basis gives us $\varphi$ exactly (when $\varphi$ could be expressed exactly in the $t$ or fewer Qbits available in the first register).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Inverse Fourier Transform       %
@@ -440,7 +452,7 @@ and thus (as Nielsen \& Chuang point out at the bottom of pg 222), a measurement
 
 \vspace{0.1in}
 
-Here we diverge a bit from Nielsen \& Chuang's presentation and take our cue from the presentation in the \textit{Wikipedia} presention on this same topic \cite{wikipedia:qpe}.
+Here we diverge a bit from Nielsen \& Chuang's presentation and take our cue from the \textit{Wikipedia} presention on this same topic \cite{wikipedia:qpe}.
 
 Recall that the state of the first register at the end of Stage 1 (just before the inverse Fourier transform) is given by:
 \begin{align}
@@ -506,7 +518,7 @@ We can then re-express the post-inverse Fourier transform state of the first reg
 %   Measure of approx'd phi         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\item 3rd Stage: Measuring First Register in Computational Basis (see the ``Measurement'' section in \cite{wikipedia:qpe})
+\item 3rd Stage: Measuring the First Register in the Computational Basis (see the ``Measurement'' section in \cite{wikipedia:qpe})
 
 \vspace{0.1in}
 
@@ -530,7 +542,7 @@ When we now perform a measurement on the first register in the computational bas
       e^{2\pi i k\delta}\bra{a}\ket{x}
     \right|^{2}
 \end{align}
-and there when summing over $x$, the only non-zero term occurs when $x=a$ (when $\bra{a}\ket{x}=\bra{a}\ket{a}=1$, otherwise $\bra{a}\ket{x} = 0$). Thus we have:
+When summing over $x$, the only non-zero term occurs when $x=a$ (because when $x=a$ we have $\bra{a}\ket{x}=\bra{a}\ket{a}=1$, otherwise $\bra{a}\ket{x} = 0$). Thus we have:
 \begin{align}
     p(a)
     &=
@@ -634,11 +646,41 @@ Then:
 \end{align}
 Thus we have over a 40\% probability of measuring the best $t$-bit estimate of $2^n\varphi$ (and thus $\varphi$) when $\varphi$ cannot be represented exactly in the $t$ Qbits of the first register.
 
+\vspace{0.1in}
 
-% \clearpage
+\item Further Work
+
+\vspace{0.1in}
+
+Some obvious further work on understanding QPE in the near future involves at least two more critically important topics, not yet touched on in this project presentation:
+
+\begin{itemize}
+    \item[\textbf{(\textit{a})}] The interrelationship(s) among the desired accuracy in measuring $\varphi$, the number of first-register Qbits $t$, and probability of measurement.
+    
+    \vspace{0.1in}
+    
+    Integrated into their development of the measurement probabilities, Nielsen \& Chuang are able to conclude that to successfully obtain $\varphi$ accurate to $n$ bits with probability of success at least $1-\epsilon$, one chooses the number of first-register Qbits $t$ to be:
+    \begin{align}
+        t
+        &=
+        n + \left\lceil \log(2 + \frac{1}{2\epsilon}) \right\rceil
+    \end{align}
+    
+    I am still working on understanding their mathematical derivation for that relationship.
+    
+    \vspace{0.1in}
+    
+    \item[\textbf{(\textit{b})}] Preparing the eigenstate $\ket{u}$.
+    
+    \vspace{0.1in}
+    
+    As Nielsen \& Chuang point out: ``In order to make use of the phase estimation algorithm, we need to be able to prepare an eigenstate $\ket{u}$ of $U$. What if we do not know how to prepare such an eigenstate?'' They briefly address this issue in a short paragraph and a related exercise, the explication of which also serves as good material for continuing study.
+    
+\end{itemize}
+
 \end{enumerate}
 
-% \clearpage
+\clearpage
 % ========== %
 % END MATTER %
 % ========== %
